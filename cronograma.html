@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agenda Musical</title>
+ <!-- Bootstrap 5 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" /><style>
+  
+
+  .modo-edicion .boton-edicion {
+    display: inline-block !important;
+  }
+
+  .boton-edicion {
+    display: none !important;
+  }
+
+
+  /* Fondo general oscuro azul */
+  body {
+    background-color: #0d1b2a;
+    color: #e0e0e0;
+  }
+
+  /* Contenedor principal */
+  .container, .modal-content {
+    background-color: #1b263b;
+    border-radius: 10px;
+    padding: 20px;
+    color: #e0e0e0;
+  }
+
+  /* Tarjetas (cards) */
+  .card {
+    background-color: #2c3e50;
+    border: none;
+    color: #ecf0f1;
+  }
+
+  .card-header {
+    background-color: #34495e;
+    border-bottom: 1px solid #2c3e50;
+  }
+
+  /* Botones */
+  .btn {
+    border: none;
+  }
+
+  .btn-primary {
+    background-color: #1d3557;
+    color: white;
+  }
+
+  .btn-warning {
+    background-color: #f39c12;
+    color: #000;
+  }
+
+  .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+  }
+
+  .btn-outline-success {
+    border-color: #4caf50;
+    color: #4caf50;
+  }
+
+  .btn-outline-danger {
+    border-color: #e74c3c;
+    color: #e74c3c;
+  }
+
+  .btn-outline-success:hover,
+  .btn-outline-danger:hover {
+    background-color: currentColor;
+    color: white;
+  }
+
+  /* Modal oscuro */
+  .modal-content {
+    background-color: #1b263b;
+  }
+
+  /* Input fields */
+  input[type="text"],
+  input[type="url"],
+  input[type="date"],
+  select,
+  .form-control {
+    background-color: #2c3e50;
+    border: 1px solid #34495e;
+    color: #fff;
+  }
+
+  input:focus, select:focus {
+    border-color: #4dabf7;
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(77, 171, 247, 0.25);
+  }
+
+  /* Badges de músicos */
+  .badge {
+    background-color: #0d6efd;
+    color: white;
+  }
+
+  /* Links de canciones */
+  .text-muted {
+    color: #aab8c2 !important;
+  }
+
+  /* Botón de cerrar modal */
+  .btn-close {
+    filter: invert(1);
+  }
+
+  /* Encabezados y titulos */
+  h1, h5 {
+    color: #ffffff;
+  }
+</style>
+
+
+</head>
+<body class="p-3">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-9">
+
+        <h1 class="mb-4 text-center">Agenda Musical</h1>
+
+        <div class="mb-3 text-center">
+          <button id="btnAgregarDia" class="btn btn-primary boton-edicion">+ Agregar día</button>
+        </div>
+
+        <div class="mb-3 text-center">
+          <button id="btnModoEdicion" class="btn btn-warning">🔒 Modo edición</button>
+        </div>
+
+        <div class="mb-3 text-center">
+          <button id="btnSalirEdicion" class="btn btn-secondary d-none">🔒 Salir del modo edición</button>
+        </div>
+
+        <!-- Agenda principal -->
+        <div id="agenda">
+          <!-- Aquí se insertan dinámicamente las fechas con músicos y repertorios -->
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+<!-- Modal nueva fecha -->
+<div class="modal fade" id="modalNuevaFecha" tabindex="-1" role="dialog" aria-labelledby="modalNuevaFechaLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalNuevaFechaLabel">Agregar nueva fecha</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <label for="inputFechaModal" class="form-label">Seleccionar fecha:</label>
+        <input type="date" class="form-control" id="inputFechaModal" />
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btnGuardarFecha">Agregar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Músicos -->
+<div class="modal fade" id="modalMusicos" tabindex="-1" aria-labelledby="modalMusicosLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalMusicosLabel">Asignar Músicos</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body" id="bodyModalMusicos">
+        <!-- Aquí se cargará dinámicamente el contenido -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="guardarMusicosBtn">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para editar músicos por instrumento -->
+<div class="modal fade" id="modalEditorInstrumentos" tabindex="-1" aria-labelledby="editorInstrumentosLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Editar músicos por instrumento</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="bodyEditorInstrumentos"></div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="guardarInstrumentosBtn">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- Modal Repertorio -->
+  <div class="modal fade" id="modalRepertorio" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Repertorio</h5>
+          <button class="btn btn-sm btn-outline-success boton-edicion" ...>✏️ Editar repertorio</button>
+        </div>
+        <div class="modal-body" id="bodyModalRepertorio"></div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" id="guardarRepertorioBtn">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para reproducir YouTube -->
+<div class="modal fade" id="modalYoutubePlayer" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Reproduciendo video</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="cerrarYoutubeModal()"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="ratio ratio-16x9">
+          <iframe id="youtubeFrame" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+  
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+<script>
+const LS_MUSICOS_POR_INSTRUMENTO = "musicosPorInstrumento";
+
+let musicosPorInstrumento = JSON.parse(localStorage.getItem(LS_MUSICOS_POR_INSTRUMENTO)) || {
+  "Directores": ["Sabri", "Maru", "Leo", "Lore", "Juanchi"],
+  "Voces": ["Lore", "Leo", "Juanchi", "Sabri", "Maru"],
+  "Teclado": ["Gaby", "Jhony", "Juanchi"],
+  "Guitarra Eléctrica": ["Gustavo"],
+  "Guitarra Acústica": ["Jhony", "Lean"],
+  "Batería": ["Diego", "Joseph"],
+  "Bajo": ["Joseph", "Jhony"],
+  "Saxo": ["Juanchi"]
+};
+
+  const LS_MUSICOS = 'asignacionesMusicos';
+  const LS_REPERTORIO = 'repertorios';
+
+  let asignacionesMusicos = JSON.parse(localStorage.getItem(LS_MUSICOS)) || {};
+  let repertorios = JSON.parse(localStorage.getItem(LS_REPERTORIO)) || {};
+  let diaActual = null;
+
+  const modalNuevaFecha = new bootstrap.Modal(document.getElementById('modalNuevaFecha'));
+
+  document.getElementById('btnAgregarDia').addEventListener('click', () => {
+    document.getElementById('inputFechaModal').value = '';
+    modalNuevaFecha.show();
+  });
+
+  document.getElementById('btnGuardarFecha').addEventListener('click', () => {
+    const fecha = document.getElementById('inputFechaModal').value;
+    if (!fecha) return alert('Por favor, selecciona una fecha');
+    if (asignacionesMusicos[fecha]) return alert('La fecha ya existe');
+
+    asignacionesMusicos[fecha] = {};
+    repertorios[fecha] = [];
+    localStorage.setItem(LS_MUSICOS, JSON.stringify(asignacionesMusicos));
+    localStorage.setItem(LS_REPERTORIO, JSON.stringify(repertorios));
+    renderizarAgenda();
+    modalNuevaFecha.hide();
+  });
+
+  function formatearFecha(fecha) {
+    const [year, month, day] = fecha.split('-');
+    return `${day}/${month}/${year}`;
+  }
+
+  function renderizarMusicos(fecha) {
+    const asignacion = asignacionesMusicos[fecha];
+    if (!asignacion) return '<em>No hay músicos asignados</em>';
+    let html = '<ul class="list-group">';
+    for (const instrumento in asignacion) {
+      const musicos = asignacion[instrumento];
+      html += `<li class="list-group-item"><strong>${instrumento}:</strong> ${musicos.join(', ') || '<em>ninguno</em>'}</li>`;
+    }
+    html += '</ul>';
+    return html;
+  }
+  
+  // Función para abrir el modal y mostrar los músicos por instrumento
+function abrirModalMusicos(fecha) {
+  diaActual = fecha;
+  const container = document.getElementById('bodyModalMusicos');
+  const clave = fecha;
+
+  // ✅ REPARA EL PROBLEMA
+  musicosPorInstrumento = JSON.parse(localStorage.getItem(LS_MUSICOS_POR_INSTRUMENTO)) || {};
+
+  container.innerHTML = `
+    <div class="mb-3">
+      ${generarBotonesInstrumentos(clave)}
+    </div>
+    <table class="table table-sm">
+      <tbody id="tbody-${idDomSafe(clave)}"></tbody>
+    </table>
+  `;
+
+  const instrumentosAsignados = asignacionesMusicos[clave] || {};
+  for (const instrumento in instrumentosAsignados) {
+    agregarFilaMusico(clave, instrumento, instrumentosAsignados[instrumento]);
+  }
+
+  new bootstrap.Modal(document.getElementById('modalMusicos')).show();
+}
+
+// Función para generar botones para cada instrumento
+function generarBotonesInstrumentos(clave) {
+  return Object.keys(musicosPorInstrumento).map(instrumento => `
+    <button class="btn btn-sm btn-outline-success me-2 mb-2" onclick="agregarFilaMusico('${clave}', '${instrumento}')">
+      ➕ ${instrumento}
+    </button>
+  `).join('');
+}
+
+// Función para agregar una fila en el modal para un instrumento
+function agregarFilaMusico(clave, instrumento, seleccionados = []) {
+  const tbody = document.getElementById(`tbody-${idDomSafe(clave)}`);
+  const fila = document.createElement("tr");
+
+  const filaId = idDomSafe(`fila-${clave}_${instrumento}`);
+  const divId = idDomSafe(`musicos-${clave}_${instrumento}`);
+
+  fila.id = filaId;
+
+  fila.innerHTML = `
+    <td>
+      <div class="mb-1 d-flex justify-content-between align-items-center">
+        <select class="form-select w-75" onchange="agregarMusicoSeleccionadoFila(this, '${clave}', '${instrumento}')">
+          <option value="">➕ Agregar músico</option>
+          ${musicosPorInstrumento[instrumento].map(m => `<option value="${m}">${m}</option>`).join('')}
+        </select>
+        <button class="btn btn-sm btn-outline-danger ms-2" onclick="eliminarInstrumentoDeFecha('${clave}', '${instrumento}')">❌</button>
+      </div>
+      <div id="${divId}" class="d-flex flex-wrap gap-2 mt-2"></div>
+      <div class="text-muted small">${instrumento}</div>
+    </td>
+  `;
+  tbody.appendChild(fila);
+
+  // Agregar los músicos seleccionados en la fila si hay músicos asignados
+  seleccionados.forEach(musico => {
+    agregarBadgeMusico(divId, musico, clave, instrumento);
+  });
+}
+
+// Función para agregar un músico seleccionado en la fila
+function agregarMusicoSeleccionadoFila(select, clave, instrumento) {
+  const valor = select.value;
+  if (!valor) return;
+
+  const divId = idDomSafe(`musicos-${clave}_${instrumento}`);
+  agregarBadgeMusico(divId, valor, clave, instrumento);
+  select.value = ""; // Limpiar el campo de selección
+}
+
+function guardarMusicosPorInstrumento() {
+  const inputs = document.querySelectorAll('#bodyModalEditorMusicos input');
+  inputs.forEach(input => {
+    const instrumento = input.dataset.instrumento;
+    const nombres = input.value.split(',').map(n => n.trim()).filter(n => n);
+    musicosPorInstrumento[instrumento] = nombres;
+  });
+
+  localStorage.setItem(LS_MUSICOS_POR_INSTRUMENTO, JSON.stringify(musicosPorInstrumento));
+  alert("Lista de músicos actualizada");
+  bootstrap.Modal.getInstance(document.getElementById("modalEditorMusicos")).hide();
+}
+
+function abrirEditorMusicosPorInstrumento() {
+  const contenedor = document.getElementById('bodyEditorInstrumentos');
+  contenedor.innerHTML = '';
+
+  // Renderizar cada instrumento y sus músicos
+  Object.entries(musicosPorInstrumento).forEach(([instrumento, musicos]) => {
+    const bloque = document.createElement('div');
+    bloque.classList.add('mb-3');
+
+    bloque.innerHTML = `
+      <label><strong>${instrumento}</strong></label>
+      <div class="d-flex flex-wrap gap-2 mb-2">
+        ${musicos.map(m => `
+          <div class="input-group mb-1" style="max-width: 300px;">
+            <input type="text" class="form-control musico-input" value="${m}" />
+            <button class="btn btn-outline-danger btn-sm eliminar-musico">❌</button>
+          </div>
+        `).join('')}
+        <div class="input-group" style="max-width: 300px;">
+          <input type="text" class="form-control nuevo-musico" placeholder="Agregar músico..." />
+          <button class="btn btn-outline-success btn-sm agregar-musico">➕</button>
+        </div>
+      </div>
+    `;
+
+    // Botones eliminar músico existentes
+    bloque.querySelectorAll('.eliminar-musico').forEach(btn => {
+      btn.addEventListener('click', () => btn.closest('.input-group').remove());
+    });
+
+    // Botón para agregar nuevo músico
+    bloque.querySelector('.agregar-musico').addEventListener('click', (e) => {
+      const input = e.target.closest('.input-group').querySelector('.nuevo-musico');
+      const nombre = input.value.trim();
+      if (nombre) {
+        const nuevoInput = document.createElement('div');
+        nuevoInput.className = 'input-group mb-1';
+        nuevoInput.style.maxWidth = '300px';
+        nuevoInput.innerHTML = `
+          <input type="text" class="form-control musico-input" value="${nombre}" />
+          <button class="btn btn-outline-danger btn-sm eliminar-musico">❌</button>
+        `;
+        bloque.querySelector('.d-flex').insertBefore(nuevoInput, input.closest('.input-group'));
+
+        nuevoInput.querySelector('.eliminar-musico').addEventListener('click', () => {
+          nuevoInput.remove();
+        });
+
+        input.value = '';
+      }
+    });
+
+    contenedor.appendChild(bloque);
+  });
+
+  // 🔻 Formulario para agregar nuevo instrumento (fuera del bucle)
+  const formNuevo = document.createElement('div');
+  formNuevo.classList.add('border-top', 'pt-3', 'mt-3');
+  formNuevo.innerHTML = `
+    <h6>➕ Agregar nuevo instrumento</h6>
+    <div class="input-group mb-3" style="max-width: 400px;">
+      <input type="text" class="form-control" id="nuevoInstrumentoInput" placeholder="Nombre del instrumento" />
+      <button class="btn btn-outline-primary" id="btnAgregarInstrumento">Agregar</button>
+    </div>
+  `;
+  contenedor.appendChild(formNuevo);
+
+  // Evento para agregar nuevo instrumento
+  document.getElementById('btnAgregarInstrumento').addEventListener('click', () => {
+    const nombre = document.getElementById('nuevoInstrumentoInput').value.trim();
+    if (!nombre) return alert("El nombre del instrumento no puede estar vacío");
+    if (musicosPorInstrumento[nombre]) return alert("Ese instrumento ya existe");
+
+    musicosPorInstrumento[nombre] = [];
+    localStorage.setItem("musicosPorInstrumento", JSON.stringify(musicosPorInstrumento));
+
+    bootstrap.Modal.getInstance(document.getElementById('modalEditorInstrumentos')).hide();
+    setTimeout(abrirEditorMusicosPorInstrumento, 300);
+  });
+
+  new bootstrap.Modal(document.getElementById('modalEditorInstrumentos')).show();
+}
+
+
+
+// Función para agregar el badge de un músico al div correspondiente
+function agregarBadgeMusico(divId, valor, clave, instrumento) {
+  const lista = document.getElementById(divId);
+  const badge = document.createElement("div");
+  badge.className = "badge rounded-pill bg-primary d-flex align-items-center gap-2 px-3 py-2";
+
+  const span = document.createElement("span");
+  span.textContent = valor;
+
+  // Permitir edición con doble clic
+  span.addEventListener('dblclick', () => {
+    const nuevoNombre = prompt("Editar nombre del músico:", span.textContent);
+    if (nuevoNombre && nuevoNombre.trim()) {
+      span.textContent = nuevoNombre.trim();
+      actualizarAsignacion(clave, instrumento);
+    }
+  });
+
+  // Botón eliminar con clase de edición
+  const boton = document.createElement("button");
+  boton.className = "btn btn-sm btn-close ms-2 boton-edicion d-none";
+  boton.onclick = () => {
+    badge.remove();
+    actualizarAsignacion(clave, instrumento);
+  };
+
+  badge.appendChild(span);
+  badge.appendChild(boton);
+  lista.appendChild(badge);
+
+  actualizarAsignacion(clave, instrumento);
+}
+
+
+// Función para actualizar las asignaciones de músicos
+function actualizarAsignacion(clave, instrumento) {
+  const divId = idDomSafe(`musicos-${clave}_${instrumento}`);
+  const nombres = Array.from(document.getElementById(divId).children)
+    .map(el => el.textContent.trim());
+
+  if (!asignacionesMusicos[clave]) asignacionesMusicos[clave] = {};
+  asignacionesMusicos[clave][instrumento] = nombres;
+
+  // 💾 Guardar automáticamente en localStorage
+  localStorage.setItem(LS_MUSICOS, JSON.stringify(asignacionesMusicos));
+}
+
+
+// Función para eliminar un instrumento de la fecha seleccionada
+function eliminarInstrumentoDeFecha(clave, instrumento) {
+  if (!confirm(`¿Eliminar "${instrumento}" de la fecha ${formatearFecha(clave)}?`)) return;
+
+  // Eliminar de los datos
+  delete asignacionesMusicos[clave][instrumento];
+
+  // Eliminar del DOM
+  const filaId = idDomSafe(`fila-${clave}_${instrumento}`);
+  const fila = document.getElementById(filaId);
+  if (fila) fila.remove();
+}
+
+// Guardar los cambios de los músicos asignados
+document.getElementById('guardarMusicosBtn').addEventListener('click', () => {
+  localStorage.setItem(LS_MUSICOS, JSON.stringify(asignacionesMusicos));
+  renderizarAgenda(); // Vuelve a renderizar la agenda con los cambios
+  bootstrap.Modal.getInstance(document.getElementById('modalMusicos')).hide(); // Cierra el modal
+});
+
+
+function renderizarRepertorio(fecha) {
+  const lista = repertorios[fecha];
+  if (!lista || lista.length === 0) return '<em>No hay repertorio asignado</em>';
+
+  let html = '<ul class="list-group">';
+  lista.forEach((cancion, i) => {
+    html += `
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <strong>${cancion.titulo}</strong>
+          ${cancion.tonalidad ? `<small class="text-muted ms-2">(${cancion.tonalidad})</small>` : ''}
+        </div>
+        <div>
+          ${cancion.youtube ? `<button class="btn btn-sm btn-outline-primary me-1" onclick="abrirYoutubeEnModal('${cancion.youtube}')">▶️</button>` : ''}
+          ${cancion.letra ? `<button class="btn btn-sm btn-outline-secondary me-1" onclick="window.open('${cancion.letra}', '_blank')">📄</button>` : ''}
+        </div>
+      </li>`;
+  });
+  html += '</ul>';
+  return html;
+}
+
+
+function abrirModalMusicos(fecha) {
+  diaActual = fecha;
+  const container = document.getElementById('bodyModalMusicos');
+  const clave = fecha;
+
+  container.innerHTML = `
+    <div class="mb-3">
+      ${generarBotonesInstrumentos(clave)}
+    </div>
+    <table class="table table-sm">
+      <tbody id="tbody-${idDomSafe(clave)}"></tbody>
+    </table>
+  `;
+
+  // Renderizar los instrumentos ya asignados
+  const instrumentosAsignados = asignacionesMusicos[clave] || {};
+  for (const instrumento in instrumentosAsignados) {
+    agregarFilaMusico(clave, instrumento, instrumentosAsignados[instrumento]);
+  }
+
+  new bootstrap.Modal(document.getElementById('modalMusicos')).show();
+}
+
+
+document.getElementById('guardarMusicosBtn').addEventListener('click', () => {
+  localStorage.setItem(LS_MUSICOS, JSON.stringify(asignacionesMusicos));
+  renderizarAgenda();
+  bootstrap.Modal.getInstance(document.getElementById('modalMusicos')).hide();
+});
+
+document.getElementById('guardarInstrumentosBtn').addEventListener('click', () => {
+  const contenedor = document.getElementById('bodyEditorInstrumentos');
+  const bloques = contenedor.querySelectorAll('.mb-3');
+
+  const nuevoMapa = {};
+
+bloques.forEach(bloque => {
+  const label = bloque.querySelector('label');
+  if (!label) return; // 👈 Salta este bloque si no tiene <label>
+
+  const titulo = label.textContent.trim();
+  const musicos = Array.from(bloque.querySelectorAll('.musico-input'))
+                       .map(input => input.value.trim())
+                       .filter(v => v);
+
+  if (titulo && musicos.length > 0) {
+    nuevoMapa[titulo] = musicos;
+  }
+});
+
+
+  musicosPorInstrumento = nuevoMapa;
+  localStorage.setItem("musicosPorInstrumento", JSON.stringify(musicosPorInstrumento));
+  alert("Cambios guardados en músicos por instrumento");
+});
+
+
+function abrirModalRepertorio(fecha) {
+  diaActual = fecha;
+  const container = document.getElementById('bodyModalRepertorio');
+  const canciones = repertorios[fecha] || [];
+
+  container.innerHTML = canciones.map((cancion) => `
+    <div class="mb-3 border p-2 rounded position-relative bloque-cancion">
+      <button type="button" class="btn-close position-absolute top-0 end-0 m-2" onclick="this.parentElement.remove()"></button>
+      <label><strong>Título</strong></label>
+      <input type="text" class="form-control mb-1 titulo" value="${cancion.titulo}" />
+      <label>Tonalidad</label>
+      <input type="text" class="form-control mb-1 tonalidad" value="${cancion.tonalidad || ''}" />
+      <label>Link YouTube</label>
+      <input type="url" class="form-control mb-1 youtube" value="${cancion.youtube || ''}" />
+      <label>Link Letra/tablatura</label>
+      <input type="url" class="form-control letra" value="${cancion.letra || ''}" />
+    </div>
+  `).join('') + `
+    <button class="btn btn-sm btn-outline-success mt-3" onclick="agregarCancion()">+ Agregar canción</button>
+  `;
+
+  new bootstrap.Modal(document.getElementById('modalRepertorio')).show();
+}
+
+
+function agregarCancion() {
+  const container = document.getElementById('bodyModalRepertorio');
+
+  const nuevoBloque = document.createElement('div');
+  nuevoBloque.className = 'mb-3 border p-2 rounded position-relative bloque-cancion'; // 👉 clase clave: 'bloque-cancion'
+  nuevoBloque.innerHTML = `
+    <button type="button" class="btn-close position-absolute top-0 end-0 m-2" onclick="this.parentElement.remove()"></button>
+    <label><strong>Título</strong></label>
+    <input type="text" class="form-control mb-1 titulo" />
+    <label>Tonalidad</label>
+    <input type="text" class="form-control mb-1 tonalidad" />
+    <label>Link YouTube</label>
+    <input type="url" class="form-control mb-1 youtube" />
+    <label>Link Letra/tablatura</label>
+    <input type="url" class="form-control letra" />
+  `;
+
+  container.appendChild(nuevoBloque);
+}
+
+document.getElementById('guardarRepertorioBtn').addEventListener('click', () => {
+  const container = document.getElementById('bodyModalRepertorio');
+  const bloques = container.querySelectorAll('.bloque-cancion'); // 👉 buscamos por clase
+
+  const nuevasCanciones = [];
+
+  bloques.forEach(bloque => {
+    const titulo = bloque.querySelector('.titulo')?.value.trim();
+    const tonalidad = bloque.querySelector('.tonalidad')?.value.trim();
+    const youtube = bloque.querySelector('.youtube')?.value.trim();
+    const letra = bloque.querySelector('.letra')?.value.trim();
+
+    if (titulo) {
+      nuevasCanciones.push({ titulo, tonalidad, youtube, letra });
+    }
+  });
+
+  repertorios[diaActual] = nuevasCanciones;
+  localStorage.setItem(LS_REPERTORIO, JSON.stringify(repertorios));
+  renderizarAgenda();
+  bootstrap.Modal.getInstance(document.getElementById('modalRepertorio')).hide();
+});
+
+
+
+  function renderizarAgenda() {
+    const agenda = document.getElementById('agenda');
+    agenda.querySelectorAll('.dia').forEach(e => e.remove());
+
+    Object.keys(asignacionesMusicos).forEach(fecha => {
+      const fechaId = fecha.replace(/-/g, '_');
+
+      const divDia = document.createElement('div');
+      divDia.classList.add('dia', 'mt-4');
+divDia.innerHTML = `
+  <button class="btn btn-link day-header fs-4 fw-bold p-0" type="button"
+    data-bs-toggle="collapse" data-bs-target="#contenedor-${fechaId}"
+    aria-expanded="false" aria-controls="contenedor-${fechaId}">
+    🎶 ${formatearFecha(fecha)}
+  </button>
+  <button class="btn btn-sm btn-outline-danger boton-edicion" onclick="eliminarFecha('${fecha}')">❌</button>
+
+  <div id="contenedor-${fechaId}" class="collapse mt-3">
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <div class="card h-100">
+<div class="card-header d-flex justify-content-between align-items-center">
+  <strong>🎤 Músicos</strong>
+  <div class="d-flex gap-2">
+    <button class="btn btn-sm btn-outline-success boton-edicion" onclick="abrirModalMusicos('${fecha}')">✏️ Editar músicos</button>
+    <button class="btn btn-sm btn-outline-secondary boton-edicion" onclick="abrirEditorMusicosPorInstrumento()">🎛️ Editar músicos por instrumento</button>
+  </div>
+</div>
+
+          <div class="card-body" id="musicos_${fechaId}">${renderizarMusicos(fecha)}</div>
+        </div>
+      </div>
+      <div class="col-md-6 mb-3">
+        <div class="card h-100">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <strong>🎼 Repertorio</strong>
+            <button class="btn btn-sm btn-outline-success boton-edicion" onclick="abrirModalRepertorio('${fecha}')">✏️ Editar repertorio</button>
+          </div>
+          <div class="card-body" id="repertorio_${fechaId}">${renderizarRepertorio(fecha)}</div>
+          <div class="d-flex align-items-center gap-2 mt-2">
+  <button class="btn btn-sm btn-outline-primary" onclick="generarPDF('${fecha}')">📄 Descargar PDF</button>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+`;
+
+      agenda.appendChild(divDia);
+
+    });
+  }
+
+  renderizarAgenda();
+
+function eliminarFecha(fecha) {
+  if (!confirm(`¿Estás seguro de que deseas eliminar la fecha ${formatearFecha(fecha)}? Esta acción no se puede deshacer.`)) {
+    return;
+  }
+
+  delete asignacionesMusicos[fecha];
+  delete repertorios[fecha];
+  localStorage.setItem(LS_MUSICOS, JSON.stringify(asignacionesMusicos));
+  localStorage.setItem(LS_REPERTORIO, JSON.stringify(repertorios));
+  renderizarAgenda();
+}
+
+
+function idDomSafe(texto) {
+  return texto.replace(/\W+/g, '_');
+}
+
+function generarBotonesInstrumentos(clave) {
+  return Object.keys(musicosPorInstrumento).map(instrumento => `
+    <button class="btn btn-sm btn-outline-success me-2 mb-2" onclick="agregarFilaMusico('${clave}', '${instrumento}')">
+      ➕ ${instrumento}
+    </button>
+  `).join('');
+}
+
+function agregarFilaMusico(clave, instrumento, seleccionados = []) {
+  const tbody = document.getElementById(`tbody-${idDomSafe(clave)}`);
+  const fila = document.createElement("tr");
+
+  const filaId = idDomSafe(`fila-${clave}_${instrumento}`);
+  const divId = idDomSafe(`musicos-${clave}_${instrumento}`);
+
+  fila.id = filaId;
+
+  fila.innerHTML = `
+    <td>
+      <div class="mb-1 d-flex justify-content-between align-items-center">
+        <select class="form-select w-75" onchange="agregarMusicoSeleccionadoFila(this, '${clave}', '${instrumento}')">
+          <option value="">➕ Agregar músico</option>
+          ${(musicosPorInstrumento[instrumento] || []).map(m => `<option value="${m}">${m}</option>`).join('')}
+        </select>
+        <button class="btn btn-sm btn-outline-danger ms-2" onclick="eliminarInstrumentoDeFecha('${clave}', '${instrumento}')">❌</button>
+      </div>
+      <div id="${divId}" class="d-flex flex-wrap gap-2 mt-2"></div>
+      <div class="text-muted small">${instrumento}</div>
+    </td>
+  `;
+  tbody.appendChild(fila);
+
+  // Rellenar si hay músicos ya asignados
+  seleccionados.forEach(musico => {
+    agregarBadgeMusico(divId, musico, clave, instrumento);
+  });
+}
+
+
+
+function agregarMusicoSeleccionadoFila(select, clave, instrumento) {
+  const valor = select.value;
+  if (!valor) return;
+
+  const divId = idDomSafe(`musicos-${clave}_${instrumento}`);
+  agregarBadgeMusico(divId, valor, clave, instrumento);
+  select.value = "";
+}
+
+function agregarBadgeMusico(divId, valor, clave, instrumento) {
+  const lista = document.getElementById(divId);
+  const badge = document.createElement("div");
+  badge.className = "badge rounded-pill bg-primary d-flex align-items-center gap-2 px-3 py-2";
+  badge.innerHTML = `
+    ${valor}
+    <button class="btn btn-sm btn-close ms-2" onclick="this.parentElement.remove(); actualizarAsignacion('${clave}', '${instrumento}')"></button>
+  `;
+  lista.appendChild(badge);
+  actualizarAsignacion(clave, instrumento);
+}
+
+function actualizarAsignacion(clave, instrumento) {
+  const divId = idDomSafe(`musicos-${clave}_${instrumento}`);
+  const nombres = Array.from(document.getElementById(divId).children).map(el => el.textContent.trim());
+  asignacionesMusicos[clave][instrumento] = nombres;
+  localStorage.setItem(LS_MUSICOS, JSON.stringify(asignacionesMusicos));
+}
+
+function eliminarInstrumentoDeFecha(clave, instrumento) {
+  if (!confirm(`¿Eliminar "${instrumento}" de la fecha ${formatearFecha(clave)}?`)) return;
+
+  // Eliminar de los datos
+  delete asignacionesMusicos[clave][instrumento];
+
+  // Eliminar del DOM
+  const filaId = idDomSafe(`fila-${clave}_${instrumento}`);
+  const fila = document.getElementById(filaId);
+  if (fila) fila.remove();
+}
+
+function abrirYoutubeEnModal(url) {
+  const videoId = extraerIdYoutube(url);
+  if (!videoId) {
+    alert("URL de YouTube inválida.");
+    return;
+  }
+  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+  document.getElementById("youtubeFrame").src = embedUrl;
+  new bootstrap.Modal(document.getElementById("modalYoutubePlayer")).show();
+}
+
+function cerrarYoutubeModal() {
+  document.getElementById("youtubeFrame").src = ""; // Detiene el video
+}
+
+function extraerIdYoutube(url) {
+  const regExp = /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/))([\w-]{11})/;
+  const match = url.match(regExp);
+  return match ? match[1] : null;
+}
+
+function activarModoEdicion() {
+  document.querySelectorAll('.boton-edicion').forEach(el => el.classList.remove('d-none'));
+  document.getElementById('btnModoEdicion').classList.add('d-none');
+  document.getElementById('btnSalirEdicion').classList.remove('d-none');
+}
+
+function desactivarModoEdicion() {
+  modoEdicionActivo = false; // 🟢 Esto es clave
+  document.body.classList.remove('modo-edicion'); // 🟢 También hay que remover la clase del body
+
+  document.querySelectorAll('.boton-edicion').forEach(el => el.classList.add('d-none'));
+  document.getElementById('btnModoEdicion').classList.remove('d-none');
+  document.getElementById('btnSalirEdicion').classList.add('d-none');
+}
+
+document.getElementById('btnSalirEdicion').addEventListener('click', desactivarModoEdicion);
+
+
+let modoEdicionActivo = false;
+const CLAVE_EDICION = "clave123"; // Cambiala por una más segura si querés
+
+document.getElementById('btnModoEdicion').addEventListener('click', () => {
+  if (!modoEdicionActivo) {
+    const clave = prompt("Ingrese la clave para activar el modo edición:");
+if (clave === CLAVE_EDICION) {
+  modoEdicionActivo = true;
+  document.body.classList.add('modo-edicion');
+  activarModoEdicion(); // 👉 Esta línea hace que aparezca el botón "Salir del modo edición"
+  alert("Modo edición activado");
+}
+ else {
+      alert("Clave incorrecta");
+    }
+  } else {
+    modoEdicionActivo = false;
+    document.body.classList.remove('modo-edicion');
+    alert("Modo edición desactivado");
+  }
+});
+
+async function generarPDF(fecha) {
+  const { jsPDF } = window.jspdf;
+  const fechaId = idDomSafe(fecha);
+  const doc = new jsPDF();
+  const margen = 15;
+  let y = margen;
+
+  // Usar una fuente que soporte caracteres especiales
+  doc.setFont("helvetica", "normal"); // Aseguramos que se usa una fuente que soporta caracteres especiales
+
+  const formateada = formatearFecha(fecha);
+  doc.setFontSize(16);
+  doc.text(`Evento: ${formateada}`, margen, y);
+  y += 10;
+
+  // Músicos
+  doc.setFontSize(12);
+  doc.text("Músicos:", margen, y);
+  y += 6;
+
+  const musicosData = asignacionesMusicos[fecha];
+  if (musicosData && Object.keys(musicosData).length > 0) {
+    for (const [instrumento, musicos] of Object.entries(musicosData)) {
+      const texto = `• ${instrumento}: ${musicos.join(', ')}`;
+      doc.text(texto, margen + 5, y);
+      y += 6;
+    }
+  } else {
+    doc.text("Sin asignaciones", margen + 5, y);
+    y += 6;
+  }
+
+  y += 5;
+
+  // Repertorio
+  doc.setFontSize(12);
+  doc.text("Repertorio:", margen, y);
+  y += 6;
+
+  const canciones = repertorios[fecha] || [];
+  if (canciones.length > 0) {
+    canciones.forEach((cancion) => {
+      doc.text(`• ${cancion.titulo}${cancion.tonalidad ? ` (${cancion.tonalidad})` : ''}`, margen + 5, y);
+      y += 6;
+
+      // Agregar enlace de YouTube
+      if (cancion.youtube && isValidURL(cancion.youtube)) {
+        const youtubeLink = cancion.youtube;
+        try {
+          console.log("Agregando enlace de YouTube:", youtubeLink);
+          const enlaceY = y; // Guarda la posición Y para el enlace de YouTube
+          doc.setTextColor(0, 0, 255); // Color azul para el enlace
+          // Utilizar el método de texto normal con la URL como enlace
+          doc.text('YouTube', margen + 10, enlaceY);
+          doc.link(margen + 10, enlaceY - 3, 30, 6, { url: youtubeLink }); // Usamos `link` para los enlaces
+          doc.setTextColor(0, 0, 0); // Regresar el color a negro
+          y += 6;
+        } catch (error) {
+          console.error("Error al agregar enlace de YouTube:", error);
+        }
+      }
+
+      // Agregar enlace de Letra/Tab
+      if (cancion.letra && isValidURL(cancion.letra)) {
+        const letraLink = cancion.letra;
+        try {
+          console.log("Agregando enlace de Letra/Tab:", letraLink);
+          const enlaceY = y; // Guarda la posición Y para el enlace de Letra/Tab
+          doc.setTextColor(0, 0, 255); // Color azul para el enlace
+          // Utilizar el método de texto normal con la URL como enlace
+          doc.text('Letra/Tab', margen + 10, enlaceY);
+          doc.link(margen + 10, enlaceY - 3, 30, 6, { url: letraLink }); // Usamos `link` para los enlaces
+          doc.setTextColor(0, 0, 0); // Regresar el color a negro
+          y += 6;
+        } catch (error) {
+          console.error("Error al agregar enlace de Letra/Tab:", error);
+        }
+      }
+
+      y += 2;
+    });
+  } else {
+    doc.text("Sin canciones asignadas", margen + 5, y);
+    y += 6;
+  }
+
+  y += 5;
+
+  // QR como imagen (opcional)
+  const qrCanvas = document.getElementById(`qr_${fechaId}`)?.querySelector('canvas');
+  if (qrCanvas) {
+    const imgData = qrCanvas.toDataURL("image/png");
+    doc.addImage(imgData, 'PNG', margen, y, 50, 50);
+    y += 60;
+  }
+
+  doc.save(`Evento_${fechaId}.pdf`);
+}
+
+// Función para validar si una URL es válida
+function isValidURL(url) {
+  const pattern = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
+  return pattern.test(url);
+}
+
+
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+  window.jsPDF = window.jspdf.jsPDF;
+</script>
+
+
+<!-- SOLO una versión de QR -->
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+
+<!-- SOLO una versión de html2canvas -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+</body>
+</html>
