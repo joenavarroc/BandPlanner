@@ -1,29 +1,33 @@
+# 🎶 BandPlanner
 
----
+**BandPlanner** es una aplicación web para organizar cronogramas musicales. Permite agendar músicos, instrumentos, repertorios y fechas asignadas para eventos musicales.
 
-## 🛠️ Tecnologías Utilizadas
+## ✨ Funcionalidades principales
 
-- HTML5 + CSS3 + JavaScript (Vanilla)
-- Bootstrap 5 para la interfaz
-- LocalStorage o integración futura con backend (según versión)
+- Agendar eventos musicales con fecha y lugar.
+- Agregar músicos participantes y asignarles instrumentos.
+- Crear, editar y eliminar:
+  - 🎤 Músicos
+  - 🎸 Instrumentos
+  - 🎵 Repertorios (canciones por evento)
+- Generar un **PDF con el itinerario del evento** (incluye repertorio, participantes y detalles del evento).
+- Protección de edición mediante clave (🔐 clave: `clave123`).
 
----
+## 📄 Requisitos
 
-## 📌 Próximas Funcionalidades
+- Navegador moderno (funciona completamente en local).
+- No requiere backend ni base de datos externa.
 
-- Filtrado por fecha, músico o repertorio.
-- Exportar cronograma como PDF.
-- Envío de recordatorios automáticos por correo.
-- Autenticación de usuarios para colaboración segura.
+## 📤 Exportación
 
----
+El sistema permite exportar el cronograma completo del evento en formato **PDF** para impresión o envío digital.
 
-## 🤝 Contribuciones
+## 🚀 ¡Comenzá a organizar tu evento musical con BandPlanner!
 
-¡Se aceptan ideas, sugerencias o colaboraciones! Podés abrir un issue o enviar un pull request.
 
----
+## 🛡️ Edición protegida
 
-## 📃 Licencia
+Para realizar ediciones o eliminar elementos importantes (como repertorios o músicos), se solicita una clave de seguridad.  
+La clave por defecto es:
 
-Este proyecto está bajo la licencia MIT.
+
